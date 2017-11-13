@@ -7,5 +7,7 @@ This is a repository for the 2017 KSE625 Team Project
 [RecSys2013: Yelp Business Rating Prediction](https://www.kaggle.com/c/yelp-recsys-2013/data)
 
 # Related Papers
-- ~Section 2 of [Graph-Based Collaborative Ranking](https://arxiv.org/pdf/1604.03147.pdf)
-- Section 2.2, 2.3 of [this paper](http://chaozhang.org/files/papers/kdd17a.pdf). Implementation by the authors is [here](https://github.com/yangji9181/PACE2017)
+- Basics of Matrix Factorization and Collaborative Filtering
+	- [Matrix Factorization Techniques for Recommender Systems(2009)](https://endymecy.gitbooks.io/spark-ml-source-analysis/content/%E6%8E%A8%E8%8D%90/papers/Matrix%20Factorization%20Techniques%20for%20Recommender%20Systems.pdf)
+- Graph-Regularized Recommender System
+	- Section 2.2, 2.3 of [this paper](http://chaozhang.org/files/papers/kdd17a.pdf). Implementation by the authors is [here](https://github.com/yangji9181/PACE2017)
