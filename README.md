@@ -6,6 +6,9 @@ This is a repository for the 2017 KSE625 Team Project
 # Dataset
 [RecSys2013: Yelp Business Rating Prediction](https://www.kaggle.com/c/yelp-recsys-2013/data)
 
+# Environment
+- Python 3.6:
+
 # Related Papers
 - Basics of Matrix Factorization and Collaborative Filtering
 	- [Matrix Factorization Techniques for Recommender Systems(2009)](https://endymecy.gitbooks.io/spark-ml-source-analysis/content/%E6%8E%A8%E8%8D%90/papers/Matrix%20Factorization%20Techniques%20for%20Recommender%20Systems.pdf)
