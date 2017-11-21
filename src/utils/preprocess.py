@@ -2,57 +2,61 @@ import os
 from os.path import join
 import json
 
-import os
-from os.path import join
-import json
-
 class JSONLoader:
     
     def __init__(self, json_file, dir_data, fields = None):
         self.home = os.path.expanduser('~')
         self.dir_data = join(self.home, dir_data)
         self.dir_json = join(self.dir_data, json_file)
-        self.fields = fields
+        self.fields = self.init_fields(fields)
         self.condition = dict()
         
     def set_condition(self, **kwargs):
         for key, value in kwargs.items():
             self.condition[key] = set(value)
-        
+    
+    def init_fields(self, fields):
+        with open(self.dir_json) as f:
+            for i, line in enumerate(f):
+                # read only the first line
+                if i > 1:
+                    break
+                json_line = json.loads(line)
+                if fields == None:
+                    fields = [key for key, value in json_line.items()]
+                else:
+                    fields = [key for key, value in json_line.items() if key in fields]
+        return fields
+    
     def sample(self, n_samples):
-        if not self.fields == None:
-            fields = set(self.fields)
-            data = []
-            with open(self.dir_json) as f:
-                for i, line in enumerate(f):
-                    if i >= n_samples:
+        
+        data = []
+        fields = set(self.fields)
+
+        f = open(self.dir_json)
+
+        for i, line in enumerate(f):
+            if i >= n_samples:
+                break
+            json_line = json.loads(line)
+            data.append([])
+#             print(json_line)
+            
+            valid_items = [(key, value) for (key, value) in json_line.items() if key in fields]
+#             print(valid_items)
+            for key, value in valid_items:
+                # value should be a list
+                value_list = []
+                if not type(value) == list:
+                    value_list = [value]
+                else:
+                    value_list = value
+                if key in self.condition:
+                    if len(set(value_list) & self.condition[key]) <= 0:
+                        del data[-1] # do not add this line
                         break
-                    json_line = json.loads(line)
-                    data.append([])
-                    for key, value in json_line.items():
-                        if key in fields:
-                            valid_key = key not in self.condition or\
-                            key in self.condition and len(set(value) & self.condition[key]) > 0
-                            if not valid_key:
-                                del data[-1] # do not add this line
-                                break
-                            else:
-                                data[-1].append(value)
-        else:
-            data = []
-            with open(self.dir_json) as f:
-                for i, line in enumerate(f):
-                    if i >= n_samples:
-                        self.fields = list(json_line.keys())
-                        break
-                    json_line = json.loads(line)
-                    data.append([])
-                    for key, value in json_line.items():
-                        valid_key = key not in self.condition or\
-                        key in self.condition and len(set(value) & self.condition[key]) > 0
-                        if not valid_key:
-                            del data[-1] # do not add this line
-                            break
-                        else:
-                            data[-1].append(value)
+                data[-1].append(value)
+
+        f.close()
+        
         return self.fields, data

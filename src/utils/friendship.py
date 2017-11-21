@@ -36,3 +36,4 @@ class GraphBuilder(JSONLoader):
                 G.add_edges_from(edges)
                 
         return G
+    
