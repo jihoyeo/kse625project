@@ -4,12 +4,13 @@ import json
 
 class JSONLoader:
     
-    def __init__(self, json_file, dir_data, fields = None):
+    def __init__(self, json_file, dir_data, fields = None, encoding = 'utf-8'):
         self.home = os.path.expanduser('~')
         self.dir_data = join(self.home, dir_data)
         self.dir_json = join(self.dir_data, json_file)
         self.fields = self.init_fields(fields)
         self.condition = dict()
+        self.encoding = encoding
         
     def set_condition(self, **kwargs):
         for key, value in kwargs.items():
@@ -33,17 +34,17 @@ class JSONLoader:
         data = []
         fields = set(self.fields)
 
-        f = open(self.dir_json)
+        f = open(self.dir_json, encoding = self.encoding)
 
         for i, line in enumerate(f):
             if i >= n_samples:
                 break
             json_line = json.loads(line)
             data.append([])
-#             print(json_line)
             
-            valid_items = [(key, value) for (key, value) in json_line.items() if key in fields]
-#             print(valid_items)
+            valid_items = [(key, value) for (key, value) in json_line.items()
+                           if key in fields or key in self.condition]
+            
             for key, value in valid_items:
                 # value should be a list
                 value_list = []
@@ -55,8 +56,11 @@ class JSONLoader:
                     if len(set(value_list) & self.condition[key]) <= 0:
                         del data[-1] # do not add this line
                         break
+                    if key not in fields:
+                        continue
                 data[-1].append(value)
 
         f.close()
+#         print(n_valid)
         
         return self.fields, data
