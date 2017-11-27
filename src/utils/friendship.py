@@ -2,13 +2,27 @@ import os
 from os.path import join
 import json
 from utils.preprocess import JSONLoader
+import networkx as nx
+
+class Friendship(nx.Graph):
+    '''
+    Friendship Network.
+    This is a child of nx.Graph where each node has additional attribute of 'influence'
+    '''
+    
+    def __init__(self):
+        super().__init__()
+    
+    def init_influence(self):
+        dc = nx.degree_centrality(self)
+        nx.set_node_attributes(self, name='influence', values=dc)
 
 class GraphBuilder(JSONLoader):
     
     def __init__(self, json_file, dir_data):
         super().__init__(json_file, dir_data, fields = ['user_id','friends'])
         
-    def build_graph(self, n_samples = 100, print_every = 10000, verbose = True):
+    def build_graph(self, n_samples = 100, print_every = 10000, verbose = True, calculate_influence = False):
         '''
         Incrementally build a friendship network
         
@@ -16,8 +30,7 @@ class GraphBuilder(JSONLoader):
             n_samples (int): the number of json user objects to use. -1 to use all samples.
         '''
         
-        import networkx as nx
-        G = nx.Graph()
+        G = Friendship()
 
         with open(self.dir_json) as f:
             for i, line in enumerate(f):
@@ -34,6 +47,10 @@ class GraphBuilder(JSONLoader):
                 friends = json_line['friends']
                 edges = [(user_id, target) for target in friends]
                 G.add_edges_from(edges)
-                
+         
+        if calculate_influence:
+            print('Calculating Influence...')
+            G.init_influence()
+            
         return G
     
