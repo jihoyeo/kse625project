@@ -21,11 +21,10 @@ class Recommender:
             user_loc (tuple): (latitude, longitude) of the user
             G (Friendship): friendship and influence structure
         '''
-        review = 'review.json'
-        fields = ['user_id','business_id']
         self.data_raw = data_raw
         self.data_pkl = data_pkl
-        self.jl = JSONLoader(review, data_raw, fields = fields)
+        self.jl_rv = JSONLoader('review.json', data_raw, fields = ['user_id','business_id'])
+        self.jl_b = JSONLoader('business.json', data_raw, fields = ['business_id'])
         self.G = G
         self.user = self.User(user_id, user_loc, G)
         self.rest_id = self.init_rest()
@@ -40,10 +39,12 @@ class Recommender:
             
         '''
         categories = [category]
-        self.jl.set_condition(stars = [5], business_id = self.rest_id,
-                              user_id = self.user.popular_friends,
-                              categories = categories)
-        _, reviews = self.jl.sample(10000000)
+        self.jl_b.set_condition(categories = categories, business_id = self.rest_id)
+        _, cat_ids = self.jl_b.sample(10000000)
+        cat_ids = [i[0] for i in cat_ids]
+        
+        self.jl_rv.set_condition(stars = [5], business_id = cat_ids, user_id = self.user.popular_friends)
+        _, reviews = self.jl_rv.sample(10000000)
         reviews = sorted(reviews, key = lambda x: -self.G.node[x[0]]['influence'])
         
 #         print('The number of 5-star reviews from the popular friends: %i' % len(reviews))
