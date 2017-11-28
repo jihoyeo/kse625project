@@ -1,23 +1,27 @@
 from utils.preprocess import JSONLoader
 import nltk
 import networkx as nx
+from wordcloud import WordCloud
 import matplotlib.pyplot as plt
+from itertools import chain
+from os.path import join
 
-class WordNet(nx.Graph):
+class WNet(nx.Graph):
     
     adj = {'JJ','JJR','JJS'}
 
-    def __init__(self, keyword):
+    def __init__(self, keywords):
         super().__init__()
-        self.keyword = keyword
-        self.add_node(keyword)
+        self.keywords = keywords
+        for keyword in keywords:
+            self.add_node(keyword)
         self.node[keyword]['count'] = 0
         
     def process_sentence(self, sent):
         sent = sent.lower()
         words = nltk.wordpunct_tokenize(sent)
 #         print(words)
-        if self.keyword not in words:
+        if self.keywords not in words:
             return
         words = [word for word in words if word != self.keyword]
         words_tagged = nltk.pos_tag(words)
@@ -50,6 +54,65 @@ class WordNet(nx.Graph):
         nx.draw_networkx_edges(self, pos, edgelist=edgelist)
         nx.draw_networkx_labels(self, pos, labels)
 
+from os.path import join
+
+class WCloud:
+    
+    adj = {'JJ','JJR','JJS'}
+    keywords = dict()
+    keywords_types = ['price','food','atmosphere','staff']
+    keywords['price'] = {'price', 'prices', 'cost', 'costs'}
+    keywords['food'] = {'food','foods' 'menus','menu', 'meal', 'meals', 'drinks',
+                 'taste', 'tastes', 'meats','meat','quality', 'qualities'}
+    keywords['atmosphere'] = {'places','place','area','areas','atmospheres',
+                           'atmosphere','decors','decoration','interiors','interior'}
+    keywords['staff'] = {'services','service', 'staffs','staff', 'server',
+                      'servers', 'waitresses','waitress','waiters','waiter'}
+
+    def __init__(self, docs):
+        super().__init__()
+        self.docs = docs
+    
+    def process(self, bid):
+        # Initialize
+        wclouds = dict()
+        
+        for type in WCloud.keywords_types:
+            words = []
+            for sent in self.docs[bid]:
+                words.extend(self.process_sent(sent, type))
+            wclouds[type] = WordCloud().generate(' '.join(words))
+            
+        self.bid = bid
+        self.wclouds = wclouds
+    
+    def process_sent(self, sent, type):
+        sent = sent.lower()
+        words = nltk.wordpunct_tokenize(sent)
+        if len(set(WCloud.keywords[type]) & set(words)) == 0:
+            words = []
+            return words
+        words_tagged = nltk.pos_tag(words)
+        adjs = [word for (word, tag) in words_tagged if tag in WCloud.adj]
+        words = [adj for adj in adjs if adj not in WCloud.keywords[type]]
+        
+        return words
+        
+    def __call__(self, doc, bid):
+        return self.process_doc(doc, bid)
+        
+    def draw(self, show=True):
+        for type in self.wclouds:
+            plt.figure(figsize=(15,15))
+            plt.imshow(self.wclouds[type], interpolation='bilinear',)
+            plt.axis('off')
+            if show:
+                plt.show()
+            else:
+                fname = join('./data','wordcloud_%s_%s' % (self.bid, type))
+                plt.savefig(fname)
+                plt.close()
+        
 def load_reviews(data_dir):
     fields = ['business_id']
     city = ['Toronto']

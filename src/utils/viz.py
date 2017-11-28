@@ -22,5 +22,4 @@ def scatterplot(cat, ps, att, loc):
     plt.xlabel('distance(meters)')
     plt.gca().invert_yaxis()
     plt.ylabel('similarity to %s' % cat)
-    
-    return fig
+    plt.show()
