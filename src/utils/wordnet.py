@@ -5,6 +5,7 @@ from wordcloud import WordCloud
 import matplotlib.pyplot as plt
 from itertools import chain
 from os.path import join
+import pickle
 
 class WNet(nx.Graph):
     
@@ -54,8 +55,6 @@ class WNet(nx.Graph):
         nx.draw_networkx_edges(self, pos, edgelist=edgelist)
         nx.draw_networkx_labels(self, pos, labels)
 
-from os.path import join
-
 class WCloud:
     
     adj = {'JJ','JJR','JJS'}
@@ -68,6 +67,8 @@ class WCloud:
                            'atmosphere','decors','decoration','interiors','interior'}
     keywords['staff'] = {'services','service', 'staffs','staff', 'server',
                       'servers', 'waitresses','waitress','waiters','waiter'}
+    with open('./data/bid2name', 'rb') as f:
+        bid2name = pickle.load(f)
 
     def __init__(self, docs):
         super().__init__()
@@ -81,7 +82,7 @@ class WCloud:
             words = []
             for sent in self.docs[bid]:
                 words.extend(self.process_sent(sent, type))
-            wclouds[type] = WordCloud().generate(' '.join(words))
+            wclouds[type] = WordCloud(background_color='white', width=800, height=600).generate(' '.join(words))
             
         self.bid = bid
         self.wclouds = wclouds
@@ -109,7 +110,7 @@ class WCloud:
             if show:
                 plt.show()
             else:
-                fname = join('./data','wordcloud_%s_%s' % (self.bid, type))
+                fname = join('./data','wordcloud_%s_%s' % (WCloud.bid2name[self.bid], type))
                 plt.savefig(fname)
                 plt.close()
         

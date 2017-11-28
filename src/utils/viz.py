@@ -17,9 +17,10 @@ def scatterplot(cat, ps, att, loc):
     fig = plt.figure(figsize=(15,15))
     for bid in ps.keys():
         plt.scatter(x = loc[bid], y = att[bid], s = ps[bid] * 1000000, alpha=0.7)
-        plt.annotate(bid2name[bid], (loc[bid], att[bid]))
+        plt.annotate(bid2name[bid], (loc[bid], att[bid]), fontsize=15)
     
-    plt.xlabel('distance(meters)')
+    plt.tick_params(labelsize = 20)
+    plt.xlabel('distance(meters)',fontsize=20, fontweight='bold')
     plt.gca().invert_yaxis()
-    plt.ylabel('similarity to %s' % cat)
+    plt.ylabel('similarity to %s' % cat, fontsize=20, fontweight='bold')
     plt.show()
